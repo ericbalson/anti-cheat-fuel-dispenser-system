@@ -1,0 +1,68 @@
+#include <Wire.h>     
+#include <LCD.h>      
+#include <LiquidCrystal_I2C.h> 
+#include <Keypad.h>    
+#include <SoftwareSerial.h>
+SoftwareSerial SendRFModule(3, 2); 
+
+const byte ROWS = 4; 
+const byte COLS = 3; 
+char hexaKeys[ROWS][COLS] = {
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'*','0','#'}
+};
+byte rowPins[ROWS] = {11, 10, 9, 8}; 
+byte colPins[COLS] = {7, 6, 5,}; 
+
+Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
+
+#define I2C_ADDR      0x3F 
+#define BACKLIGHT_PIN 3
+#define En_pin        2
+#define Rw_pin        1
+#define Rs_pin        0
+#define D4_pin        4
+#define D5_pin        5
+#define D6_pin        6
+#define D7_pin        7
+
+LiquidCrystal_I2C twilcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin, BACKLIGHT_PIN, POSITIVE);
+
+String code;
+int inputallow = 0;
+int pos = -1;
+int passcode = 0;
+int viewkey = 0;
+
+
+char customKey = ' ';
+char incoming = "a";
+String msg = "";
+float money = 0;
+float unitprice = 3500;
+float liters = 0;
+float prev = 0;
+
+void setup() {
+     Serial.begin(9600);
+     delay(1000);
+     twilcd.begin(20, 4);
+     delay(100); 
+     twilcd.clear();
+     twilcd.home();
+     twilcd.print("FUEL INPUT SYSTEM");
+     twilcd.setCursor(0,1);
+     twilcd.setBacklight(HIGH);
+     delay(3000); 
+     SendRFModule.begin(9600);
+}
+
+void loop() {
+KeypadRecv();
+ delay(100);
+   
+   if(viewkey == 0)
+   {
+     lcdDisplay(); }
