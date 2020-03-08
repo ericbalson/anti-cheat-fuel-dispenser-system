@@ -1,0 +1,11 @@
+void lcdDisplay()
+{
+     twilcd.clear();
+     twilcd.home();
+     twilcd.print("FUEL INPUT SYSTEM");
+     twilcd.setCursor(0,1);
+     twilcd.print("1.PRESS *");
+     twilcd.setCursor(0,2);
+     twilcd.print("2.INPUT THE AMOUNT");
+     twilcd.setCursor(0,3);
+     twilcd.print("3.PRESS #"); }
