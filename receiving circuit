@@ -1,0 +1,208 @@
+#include <Wire.h>
+#include <LCD.h>
+#include <LiquidCrystal_I2C.h>
+#include <SoftwareSerial.h>
+#define frs 3
+#define I2C_ADDR      0x3F 
+#define BACKLIGHT_PIN 3
+#define En_pin        2
+#define Rw_pin       1
+#define Rs_pin        0
+#define D4_pin       4
+#define D5_pin        5
+#define D6_pin        6
+#define D7_pin        7
+
+LiquidCrystal_I2C twilcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin, BACKLIGHT_PIN, POSITIVE);
+
+SoftwareSerial RecvRFModule(6, 7); 
+int pump = 10;
+int valve = 11;
+float litersA; //variable for liters from the tank
+float unitprice = 3500;
+String msg = " ";
+String incoming_units = " ";
+double rem_liters;
+double last_upliters;
+
+char incoming = 'a';
+int incomingclear = 0;
+
+float waterlevel = 0;
+float modulus;
+float divisor = 6;
+float count = 1;
+int buzzer = 5;
+
+void(* resetFunc) (void) = 0;
+
+volatile uint16_t pulsesA = 0;
+volatile uint8_t lastflowpinstateA;
+volatile uint32_t lastflowratetimerA = 0;
+volatile float flowrateA;
+
+SIGNAL(TIMER0_COMPA_vect) {
+  uint8_t xA = digitalRead(frs);
+  
+  if (xA == lastflowpinstateA) {
+    lastflowratetimerA++;
+    return; 
+  }
+  
+  if (xA == HIGH) {
+    pulsesA++;
+  }
+  lastflowpinstateA = xA;
+  flowrateA = 1000.0;
+  flowrateA /= lastflowratetimerA; 
+  lastflowratetimerA = 0;
+}
+
+void useInterruptA(boolean v) {
+  if (v) {
+    OCR0A = 0xAF;
+    TIMSK0 |= _BV(OCIE0A);
+  } else {
+    TIMSK0 &= ~_BV(OCIE0A);
+  }
+}
+
+void setup(){
+
+    Serial.begin(9600);
+    pinMode(frs, INPUT);
+    digitalWrite(frs, HIGH);
+    pinMode(pump, OUTPUT);
+    pinMode(valve, OUTPUT);
+    pinMode(buzzer, OUTPUT);
+    lastflowpinstateA = digitalRead(frs);
+    useInterruptA(true);
+    twilcd.begin(16, 2);
+    twilcd.setCursor(0, 0);
+    twilcd.print("I2C/TWI BackPack");
+    twilcd.setBacklight(HIGH);
+    delay(1000);
+    
+    twilcd.clear();
+    twilcd.print("FUEL DISPENSER");
+    delay(3000);
+    RecvRFModule.begin(9600);
+}
+
+void loop(){
+  litersA = pulsesA;
+  litersA /= 4.5;
+  litersA /= 60.0;
+ 
+  Serial.print("Taken fuel: ");
+  Serial.println (litersA);
+  Serial.print("      ");
+    
+ if(RecvRFModule.available())
+  {
+incoming = RecvRFModule.read();
+    Serial.print(incoming);  
+
+     if(incoming != '#')
+    {
+    msg += String(incoming);
+    }
+    else
+    {
+      if(msg.indexOf("*") >=0)
+      {
+        Serial.println(msg);
+        incoming_units = msg.substring(1,15);
+        Serial.print("INCOMING UNITS: ");
+        Serial.println(incoming_units);
+        last_upliters = (incoming_units.toFloat())/unitprice;
+        pulsesA = 0;
+
+        Serial.print("LAST UPLITERS: ");
+        Serial.println(last_upliters);
+        msg = "";
+        incoming = 'a';
+        incomingclear = 1;
+        twilcd.clear();
+        twilcd.home();
+        twilcd.print("MONEY: ");
+        twilcd.setCursor(7, 0);
+        twilcd.print(incoming_units);
+        twilcd.setCursor(0, 1);
+        twilcd.print("FUEL: ");
+        twilcd.setCursor(7, 1);
+        twilcd.print(last_upliters,2);
+        twilcd.setCursor(15, 1);
+        twilcd.print("l");
+        incoming_units = "";
+        delay(4000);
+        twilcd.clear();
+        
+      }
+    }
+    }
+   lcdprint();
+   delay(100);
+
+   rem_liters = last_upliters - litersA;
+
+if(incomingclear == 1)
+   {
+   if(rem_liters > 0)
+   {
+
+    if(rem_liters < 0.01)
+    {
+      RecvRFModule.print("FINISHED#");
+      RecvRFModule.print("FINISHED#");    
+    }
+
+    else
+    {
+    waterlevel = analogRead(A0);
+    Serial.print("WATER LEVEL: ");
+    Serial.println(waterlevel);
+    if(waterlevel > 300)
+    {
+    digitalWrite(pump,HIGH);
+    digitalWrite(valve,HIGH);
+    digitalWrite(buzzer, LOW);
+    }
+    else
+    {
+      digitalWrite(pump,LOW);
+      digitalWrite(valve,LOW);
+      digitalWrite(buzzer, HIGH);
+    }
+    modulus = fmod(count,divisor);
+    
+    if(modulus <= 0)
+  {
+    Serial.println("SENDING: ");
+    
+    RecvRFModule.print(rem_liters);
+    RecvRFModule.print("###");
+  }
+    }
+    
+   }
+   else
+   {
+    digitalWrite(pump,LOW);
+    digitalWrite(valve,LOW);
+    rem_liters = 0;
+    pulsesA = 0;
+    last_upliters = 0;
+    delay(100);
+    resetFunc();
+    
+   }
+   }
+  
+count = count + 1;
+
+if(rem_liters < 0)
+   {
+    rem_liters = 0;
+   }
+  }
