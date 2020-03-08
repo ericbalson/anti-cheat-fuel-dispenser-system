@@ -1,0 +1,144 @@
+void KeypadRecv()
+{
+customKey = customKeypad.getKey();
+  
+  if (customKey){
+    Serial.println(customKey);
+
+    if(customKey == '*') 
+  {
+    viewkey = 1;
+    if(inputallow == 0)
+    {
+    inputallow = 1;
+     twilcd.clear();
+     twilcd.home();
+     twilcd.print("INPUT");
+     twilcd.setCursor(0,1);
+     twilcd.print("THE AMOUNT OF MONEY");
+     delay(3000);
+    customKey = ' ';
+    }
+  }
+
+    void KeypadRecv()
+{
+customKey = customKeypad.getKey();
+  
+  if (customKey){
+    Serial.println(customKey);
+
+    if(customKey == '*') 
+  {
+    viewkey = 1;
+    if(inputallow == 0)
+    {
+    inputallow = 1;
+     twilcd.clear();
+     twilcd.home();
+     twilcd.print("INPUT");
+     twilcd.setCursor(0,1);
+     twilcd.print("THE AMOUNT OF MONEY");
+     delay(3000);
+    customKey = ' ';
+    }
+  }
+
+  if(inputallow==1)
+  {
+    if(customKey == '*') 
+  {
+    
+     twilcd.clear();
+     twilcd.clear();
+     twilcd.home();
+     twilcd.print("INPUT");
+     twilcd.setCursor(0,1);
+     twilcd.print("THE AMOUNT OF MONEY");
+    delay(3000);
+    delay(100);
+    twilcd.setCursor(0,2);
+    code = "";
+    pos = -1;
+    delay(1000);
+  }
+    else if(customKey == '#')
+    {
+    Serial.println(code);
+    pos = -1;
+    inputallow = 0;
+    delay(500);
+    twilcd.setCursor(0, 3);
+    delay(100);
+    twilcd.print("PROCESING......");
+    
+    customKey = ' ';
+    delay(2000); 
+    twilcd.clear();
+    promptFunc();
+    viewkey = 0;
+    inputallow = 0;
+     code= "";
+   }
+    else
+    {
+     twilcd.home();
+     twilcd.home();
+     twilcd.print("FUEL INPUT SYSTEM");
+     twilcd.setCursor(0,1);
+     pos = pos+1;
+     twilcd.setCursor(pos, 2);
+     twilcd.print(customKey);
+     code = code + String(customKey);  
+     delay(500);
+    }
+  }
+  }}
+if(inputallow==1)
+  {
+    if(customKey == '*') 
+  {
+    
+     twilcd.clear();
+     twilcd.clear();
+     twilcd.home();
+     twilcd.print("INPUT");
+     twilcd.setCursor(0,1);
+     twilcd.print("THE AMOUNT OF MONEY");
+    delay(3000);
+    delay(100);
+    twilcd.setCursor(0,2);
+    code = "";
+    pos = -1;
+    delay(1000);
+  }
+    else if(customKey == '#')
+    {
+ Serial.println(code);
+    pos = -1;
+    inputallow = 0;
+    delay(500);
+    twilcd.setCursor(0, 3);
+    delay(100);
+    twilcd.print("PROCESING......");
+    customKey = ' ';
+    delay(2000); 
+    twilcd.clear();
+    promptFunc();
+    viewkey = 0;
+    inputallow = 0;
+     code= ""; }
+    else
+    {
+    twilcd.home();
+     twilcd.home();
+     twilcd.print("FUEL INPUT SYSTEM");
+     twilcd.setCursor(0,1);
+     pos = pos+1;
+     twilcd.setCursor(pos, 2);
+     twilcd.print(customKey);
+     code = code + String(customKey);  
+     delay(500);
+    }
+  }
+  }}
