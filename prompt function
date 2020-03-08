@@ -1,0 +1,41 @@
+void promptFunc()
+{
+  customKey = ' ';    
+  while(1)
+  {
+  
+     twilcd.home();
+     twilcd.print("FUEL INPUT SYSTEM");
+     twilcd.setCursor(0,1);
+     twilcd.print("ARE YOU SURE YOU");
+     twilcd.setCursor(0,2);
+     twilcd.print("WANT FUEL WORTH");
+     twilcd.setCursor(0,3);
+     twilcd.print(code);
+     twilcd.setCursor(9,3);
+     twilcd.print("shs");
+     delay(100);
+     twilcd.clear();
+     customKey = customKeypad.getKey();
+     Serial.println(customKey);
+     
+     if((customKey == '*')||(customKey == '#'))
+     {
+      break;
+     }
+  }
+
+  if(customKey == '*')
+     {
+        KeypadRecv;
+     }
+     else if(customKey == '#')
+     {
+      SendRFModule.println("*");
+      SendRFModule.println(code);
+      SendRFModule.println("#");
+      Serial.println("CODE SENT");
+     }
+     else
+     {
+      }}
