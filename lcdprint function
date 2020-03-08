@@ -1,0 +1,12 @@
+void lcdprint()
+{
+  twilcd.clear();
+  twilcd.home();
+  twilcd.print("FUEL DISPENSER");
+  twilcd.setCursor(0, 1);
+  twilcd.print("Rem Fuel: ");
+  twilcd.setCursor(10, 1);
+  twilcd.print(rem_liters,2);
+  twilcd.setCursor(15, 1);
+  twilcd.print("l");
+  }
